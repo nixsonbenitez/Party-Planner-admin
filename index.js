@@ -1,6 +1,6 @@
 // === Constants ===
 const BASE = "https://fsa-crud-2aa9294fe819.herokuapp.com/api";
-const COHORT = ""; // Make sure to change this!
+const COHORT = "/2512-FTB-CT-WEB-PT"; 
 const API = BASE + COHORT;
 
 // === State ===
@@ -93,6 +93,8 @@ function SelectedParty() {
     return $p;
   }
 
+
+  //I am going to be adding my edits and adding selectedParty() and the party form
   const $party = document.createElement("section");
   $party.innerHTML = `
     <h3>${selectedParty.name} #${selectedParty.id}</h3>
@@ -102,9 +104,12 @@ function SelectedParty() {
     <address>${selectedParty.location}</address>
     <p>${selectedParty.description}</p>
     <GuestList></GuestList>
+    <button>Remove Party </button>
   `;
+  //Adding the delete button here, I won't touch return $party as it is making my code easier.
+  const $delete = $party.querySelector("button");
+  $delete.addEventListener("click", () => removeParty(selectedParty.id));
   $party.querySelector("GuestList").replaceWith(GuestList());
-
   return $party;
 }
 
@@ -127,6 +132,78 @@ function GuestList() {
 
   return $ul;
 }
+//The bottom portion handles the addition of new party
+//once the user clicks the submit it will send our data (name, description, location and date (which was turn from a string to a date object (toISOString)))
+//the await addParty sends our data to the API which is then displayed on the screen. 
+// return form just returns what was already done. toISOString was a good warning. 
+
+function NewPartyForm(){
+  const $form = document.createElement("form");
+  $form.innerHTML = `
+  <label>
+  Name:
+  <input name="name" required/>
+  </label>
+  <label>
+  Description:
+  <input name="description" required/>
+  </label>
+  <label>
+  Location:
+  <input name="location" required/>
+  </label>
+  <label>
+  Date:
+  <input name="date" required/>
+  </label>
+  <button> Create Party! </button>
+  `;
+$form.addEventListener("submit", async(e) =>{ 
+  e.preventDefault();
+  const data = new FormData($form);
+  console.log(data.get("name"));
+  console.log(data.get("description"));
+  console.log(data.get("location"));
+  console.log(data.get("date"));
+  await addParty ({
+    name: data.get("name"),
+    description: data.get("description"),
+    location: data.get("location"),
+    date: new Date(data.get("date")).toISOString(),
+  })
+})
+return $form;
+}
+
+
+//  This is the new line of code and everything I will be submitting!
+// We will be kicking off the code with addParty, this will bring our data in  from the API 
+// Specifically in the events, this will also set me up to send parties as we will use this code later 
+// in the code. getParties = fetches and addParty() sends a POST request
+async function addParty(party) {
+ try{await fetch(API + "/events", {
+    method: 'POST',
+    headers: {"Content-Type" : "application/json"},
+    body: JSON.stringify(party),
+  }); getParties();}catch(e){
+    console.error(e);
+  }
+}
+
+
+//The next part I will be writing will be is a remove function it will fetch the API and the ID of events
+//then it will rerender getParties after it was deleted. 
+async function removeParty(id) {
+  try{await fetch (`${API}/events/${id}`,{
+    method: "DELETE",
+  });
+  selectedParty = null;
+  getParties();
+  } catch (e){
+    console.error(e)
+  }
+}
+
 
 // === Render ===
 function render() {
@@ -142,13 +219,18 @@ function render() {
         <h2>Party Details</h2>
         <SelectedParty></SelectedParty>
       </section>
+      <section>
+      <NewPartyForm> </NewPartyForm>
+      </section>
     </main>
-  `;
-
+  `
   $app.querySelector("PartyList").replaceWith(PartyList());
   $app.querySelector("SelectedParty").replaceWith(SelectedParty());
+  $app.querySelector("NewPartyForm").replaceWith(NewPartyForm());
 }
 
+
+//the top three are way I added 
 async function init() {
   await getParties();
   await getRsvps();
