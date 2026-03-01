@@ -132,7 +132,22 @@ function GuestList() {
 
   return $ul;
 }
-//The bottom portion handles the addition of new party
+
+//Everything below is my code
+// We will be kicking off the code with addParty, this will bring our data in  from the API 
+// Specifically in the events, this will also set me up to send parties as we will use this code later 
+// in the code. getParties = fetches and addParty() sends a POST request
+async function addParty(party) {
+ try{await fetch(API + "/events", {
+    method: 'POST',
+    headers: {"Content-Type" : "application/json"},
+    body: JSON.stringify(party),
+  }); getParties();}catch(e){
+    console.error(e);
+  }
+}
+
+//The bottom portion handles the addition of new party form
 //once the user clicks the submit it will send our data (name, description, location and date (which was turn from a string to a date object (toISOString)))
 //the await addParty sends our data to the API which is then displayed on the screen. 
 // return form just returns what was already done. toISOString was a good warning. 
@@ -176,21 +191,6 @@ return $form;
 }
 
 
-//  This is the new line of code and everything I will be submitting!
-// We will be kicking off the code with addParty, this will bring our data in  from the API 
-// Specifically in the events, this will also set me up to send parties as we will use this code later 
-// in the code. getParties = fetches and addParty() sends a POST request
-async function addParty(party) {
- try{await fetch(API + "/events", {
-    method: 'POST',
-    headers: {"Content-Type" : "application/json"},
-    body: JSON.stringify(party),
-  }); getParties();}catch(e){
-    console.error(e);
-  }
-}
-
-
 //The next part I will be writing will be is a remove function it will fetch the API and the ID of events
 //then it will rerender getParties after it was deleted. 
 async function removeParty(id) {
@@ -205,6 +205,7 @@ async function removeParty(id) {
 }
 
 
+//What i added was NewPartyForm and PartyList as that renders the data.
 // === Render ===
 function render() {
   const $app = document.querySelector("#app");
@@ -230,7 +231,6 @@ function render() {
 }
 
 
-//the top three are way I added 
 async function init() {
   await getParties();
   await getRsvps();
@@ -238,4 +238,6 @@ async function init() {
   render();
 }
 
+
+//Question for Byron, I am trying to still figure out what init does, if its like 
 init();
